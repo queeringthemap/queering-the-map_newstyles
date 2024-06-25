@@ -1,8 +1,7 @@
 <script>
-	import logo from '$lib/assets/queering-the-map-logo.webp';
-	import infoButton from '$lib/assets/info.svg';
-	import addButton from '$lib/assets/add.svg';
+	import { IconNotifications, IconInfo } from '$lib/icons';
 	import { infoOverlayVisible, addOverlayVisible } from '../stores';
+	import Logo from './Logo.svelte';
 
 	function openInfoOverlay() {
 		infoOverlayVisible.update(() => true);
@@ -21,12 +20,14 @@
 			aria-label="open info overlay"
 		>
 			<span class="overlay-trigger__title">Info</span>
-			<img class="overlay-trigger__icon" src={infoButton} alt="info" />
+			<IconInfo />
 		</button>
 	{/if}
 
-	<div id="logo">
-		<img src={logo} alt="" />
+	<div class="float-center">
+		<div id="logo">
+			<Logo />
+		</div>
 	</div>
 
 	{#if !$addOverlayVisible}
@@ -36,31 +37,21 @@
 			id="add"
 			aria-label="open add overlay"
 		>
-			<img class="overlay-trigger__icon" src={addButton} alt="add" />
+			<IconNotifications />
 		</button>
 	{/if}
 </nav>
 
 <style>
 	#logo {
-		display: inline-block;
 		position: absolute;
-		text-align: center;
 		top: 1em;
 		width: 100%;
-		margin: 0 auto;
-		pointer-events: none;
-		z-index: var(--logo-z-index);
-	}
-
-	#logo img {
-		width: 100px;
-	}
-
-	@media (min-width: 800px) {
-		#logo img {
-			width: 200px;
-		}
+		--width: calc(min(22vw, 200px));
+		width: var(--width);
+		left: calc(50% - (var(--width) / 2));
+		max-height: 48px;
+		z-index: 1;
 	}
 
 	.overlay-trigger {
@@ -82,19 +73,6 @@
 		}
 	}
 
-	.overlay-trigger .overlay-trigger__icon {
-		display: block;
-		width: 40px;
-		height: auto;
-	}
-
-	@media (min-width: 800px) {
-		.overlay-trigger .overlay-trigger__icon {
-			top: 0.25em;
-			width: 50px;
-		}
-	}
-
 	.overlay-trigger.overlay-trigger--info {
 		left: 0.25em;
 		top: 0.25em;
@@ -104,12 +82,6 @@
 	@media (min-width: 800px) {
 		.overlay-trigger.overlay-trigger--info {
 			left: 0.5em;
-		}
-	}
-
-	@media (min-width: 800px) {
-		.overlay-trigger.overlay-trigger--info .overlay-trigger__icon {
-			display: none;
 		}
 	}
 

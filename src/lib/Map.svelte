@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { Map, NavigationControl, Popup, type LngLatLike } from 'maplibre-gl';
-	import { getMomentText } from '$lib/getMomentText';
 	import 'maplibre-gl/dist/maplibre-gl.css';
 
 	import markerImage from '$lib/assets/marker.png';
@@ -46,7 +45,12 @@
 
 			map.loadImage(markerImage, (error, image) => {
 				if (error) throw error;
-				map.addImage('marker', image);
+				if (!image) throw new Error('No image provided');
+				if (image instanceof ImageBitmap) {
+					map.addImage('marker', image);
+				} else {
+					throw new Error('Unknown instance-type for image: ' + image.constructor.name);
+				}
 			});
 
 			map.addLayer({
@@ -57,32 +61,33 @@
 					'icon-allow-overlap': true,
 					'icon-image': 'marker',
 					'icon-size': 0.5,
-					"icon-anchor": "bottom"
+					'icon-anchor': 'bottom'
 				},
 				paint: {}
 			});
 
 			map.on('click', 'moments-layer', function (e) {
-				if (e.features && e.features.length > 0) {
-					const feature = e.features[0];
-					if (feature.geometry.type === 'Point') {
-						const coordinates = (feature.geometry as GeoJSON.Point).coordinates;
-						getMoment(feature.properties.id)
-							.then((text) => {
-								const description = text;
-								if (coordinates.length === 2) {
-									new Popup({offset: 40})
-										.setLngLat(coordinates as LngLatLike)
-										.setHTML(description)
-										.addTo(map);
-								} else {
-									console.error('Invalid coordinates format');
-								}
-							})
-							.catch((error) => {
-								console.error('Error fetching moment:', error);
-							});
-					}
+				if (!e.features || e.features.length) {
+					return;
+				}
+				const feature = e.features[0];
+				if (feature.geometry.type === 'Point') {
+					const coordinates = (feature.geometry as GeoJSON.Point).coordinates;
+					getMoment(feature.properties.id)
+						.then((text) => {
+							const description = text;
+							if (coordinates.length === 2) {
+								new Popup({ offset: 40 })
+									.setLngLat(coordinates as LngLatLike)
+									.setHTML(description)
+									.addTo(map);
+							} else {
+								console.error('Invalid coordinates format');
+							}
+						})
+						.catch((error) => {
+							console.error('Error fetching moment:', error);
+						});
 				}
 			});
 
